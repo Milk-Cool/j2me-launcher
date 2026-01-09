@@ -18,6 +18,17 @@ char jar_path[512] = "";
 vector<string> filenames;
 int sel = 0;
 
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+void deinit_sdl() {
+    SDL_DestroyWindow(window);
+}
+void init_sdl() {
+    SDL_Init(SDL_INIT_VIDEO);
+    SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
+}
+
 void update_filenames() {
     filenames.erase(filenames.begin(), filenames.end());
 
@@ -64,9 +75,13 @@ void open_file_or_dir() {
             strcat(fpath, fname.c_str());
             const char* args[] = { "/usr/bin/java", "-jar", jar_path, fpath, "240", "320", NULL };
 
+            deinit_sdl();
+
             pid_t pid;
             posix_spawn(&pid, "/usr/bin/java", NULL, NULL, (char**)args, environ);
             waitpid(pid, NULL, 0);
+
+            init_sdl();
         }
     }
 }
@@ -99,13 +114,7 @@ int main(int argc, char** argv) {
 
     append_slash(path);
 
-    SDL_Window* window = NULL;
-    SDL_Renderer* renderer = NULL;
-
-    SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
-    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
-
+    init_sdl();
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("font.ttf", 18);
 
@@ -158,7 +167,7 @@ int main(int argc, char** argv) {
                     quit = 1;
     }
 
-    SDL_DestroyWindow(window);
+    deinit_sdl();
     SDL_Quit();
 
     return 0;
