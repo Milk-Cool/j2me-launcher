@@ -123,7 +123,8 @@ void get_text_and_rect(SDL_Renderer* renderer, int x, int y, const char* text, T
 }
 
 int main(int argc, char** argv) {
-    was_drm = !strcmp(getenv("SDL_VIDEODRIVER"), "kmsdrm");
+    char* video_driver = getenv("SDL_VIDEODRIVER");
+    was_drm = video_driver != NULL && !strcmp(video_driver, "kmsdrm");
     if(was_drm) printf("drm detected\n");
 
     if(argc > 2) {
