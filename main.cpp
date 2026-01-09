@@ -103,7 +103,8 @@ int main(int argc, char** argv) {
     SDL_Renderer* renderer = NULL;
 
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE, &window, &renderer);
+    SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+    SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
 
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("font.ttf", 18);
@@ -135,6 +136,8 @@ int main(int argc, char** argv) {
 
         get_text_and_rect(renderer, 4, HEIGHT - 31 + 4, "J2ME Launcher", font, &texture, &rect);
         SDL_RenderCopy(renderer, texture, NULL, &rect);
+
+        SDL_SetRenderDrawColor(renderer, 0x1a, 0x1b, 0x24, 0xff);
 
         SDL_RenderPresent(renderer);
 
