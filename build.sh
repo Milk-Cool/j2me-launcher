@@ -1,0 +1,1 @@
+g++ main.cpp -o launcher -lSDL2 -lSDL2_ttf
