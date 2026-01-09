@@ -117,6 +117,7 @@ int main(int argc, char** argv) {
     init_sdl();
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("font.ttf", 18);
+    bool cursor = SDL_ShowCursor(0) == 1;
 
     update_filenames();
 
@@ -168,6 +169,7 @@ int main(int argc, char** argv) {
     }
 
     deinit_sdl();
+    SDL_ShowCursor(cursor);
     SDL_Quit();
 
     return 0;
