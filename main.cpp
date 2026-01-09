@@ -20,13 +20,33 @@ int sel = 0;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL;
+TTF_Font* font;
+bool cursor;
+bool was_drm = false;
 void deinit_sdl() {
+    TTF_CloseFont(font);
+    TTF_Quit();
+
+    SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_ShowCursor(cursor);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    SDL_Quit();
 }
 void init_sdl() {
+    if(was_drm) {
+        setenv("SDL_VIDEODRIVER", "kmsdrm", 1);
+        unsetenv("DISPLAY");
+        unsetenv("WAYLAND_DISPLAY");
+        unsetenv("WAYLAND_SOCKET");
+    }
     SDL_Init(SDL_INIT_VIDEO);
     SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
     SDL_RenderSetLogicalSize(renderer, WIDTH, HEIGHT);
+
+    TTF_Init();
+    font = TTF_OpenFont("font.ttf", 18);
+    cursor = SDL_ShowCursor(0) == 1;
 }
 
 void update_filenames() {
@@ -81,6 +101,7 @@ void open_file_or_dir() {
             posix_spawn(&pid, "/usr/bin/java", NULL, NULL, (char**)args, environ);
             waitpid(pid, NULL, 0);
 
+            SDL_Delay(500);
             init_sdl();
         }
     }
@@ -102,6 +123,9 @@ void get_text_and_rect(SDL_Renderer* renderer, int x, int y, const char* text, T
 }
 
 int main(int argc, char** argv) {
+    was_drm = !strcmp(getenv("SDL_VIDEODRIVER"), "kmsdrm");
+    if(was_drm) printf("drm detected\n");
+
     if(argc > 2) {
         strcpy(path, argv[2]);
         strcpy(jar_path, argv[1]);
@@ -115,10 +139,6 @@ int main(int argc, char** argv) {
     append_slash(path);
 
     init_sdl();
-    TTF_Init();
-    TTF_Font* font = TTF_OpenFont("font.ttf", 18);
-    bool cursor = SDL_ShowCursor(0) == 1;
-
     update_filenames();
 
     bool quit = false;
@@ -169,8 +189,6 @@ int main(int argc, char** argv) {
     }
 
     deinit_sdl();
-    SDL_ShowCursor(cursor);
-    SDL_Quit();
 
     return 0;
 }
